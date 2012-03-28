@@ -23,25 +23,25 @@ def decodeChrName(number):
 
 
 #table scheme for main map table
-class MainChunkMap(IsDescription):
-    colId = Int64Col(pos=1)
-    alignmentNumber = UInt16Col(pos=2)
-    chunk = UInt32Col(pos=3)
-    segment = UInt32Col(pos=4)
-    score = Float64Col(pos=5)
-    begin = Int64Col(pos=6)
-    end = Int64Col(pos=7)
+class MainChunkMap(IsDescription): # maps.main
+    colId = Int64Col(pos=1) # key
+    alignmentNumber = UInt16Col(pos=2) # alignment nr (encoded chr nr)
+    chunk = UInt32Col(pos=3) # chunk nr
+    segment = UInt32Col(pos=4) # maf nr nr in chunk (for tracking chunkinization procedure)
+    score = Float64Col(pos=5) # maf alignment score
+    begin = Int64Col(pos=6) # alignment coord
+    end = Int64Col(pos=7)   # alignment coord
 
 #table scheme for the species mapping
-class SpeciesChunkMap(IsDescription):
-    colId = Int64Col(pos=1)
-    chromosome = UInt16Col(pos=2)
-    strand = Int8Col(pos=2)
+class SpeciesChunkMap(IsDescription): # maps.<speciesname>
+    colId = Int64Col(pos=1) # key
+    chromosome = UInt16Col(pos=2) # species chromosome
+    strand = Int8Col(pos=3) # ect..
     begin = Int64Col(pos=4)
     end = Int64Col(pos=5)
 
 #table scheme for the coordinates    
-class SpeciesCoordinates(IsDescription):
+class SpeciesCoordinates(IsDescription): # coords.<speciesname>  (single pos coordinates, mapping between alignment and species coordinates)
     chromosome = UInt16Col(pos=1)
     strand = Int8Col(pos=2)
     SpeciesPositionOnPlusStrand = Int64Col(pos=3)
@@ -49,7 +49,7 @@ class SpeciesCoordinates(IsDescription):
     alignmentPosition = Int64Col(pos=5)
     
 #table scheme for the coordinates    
-class SpeciesIntervalCoordinates(IsDescription):
+class SpeciesIntervalCoordinates(IsDescription): # coords.<speciesname> same as above but for intervals
     chromosome = UInt16Col(pos=1)
     strand = Int8Col(pos=2)
     alignmentNumber = UInt16Col(pos=3)
@@ -59,17 +59,18 @@ class SpeciesIntervalCoordinates(IsDescription):
     alignmentPositionEnd = Int64Col(pos=7)
     
 #Table scheme for storing posterior probs
-class Posteriors(IsDescription):
-    V0 = Float64Col(pos=1)
-    V1 = Float64Col(pos=2)
+"""class Posteriors(IsDescription): # posteriors.<speciesname> 
+    V0 = Float64Col(pos=1) # state 0
+    V1 = Float64Col(pos=2) # etc...
     V2 = Float64Col(pos=3)
     V3 = Float64Col(pos=4)
-    maxstate = UInt16Col(pos=5)
-    maxP = Float64Col(pos=6)
-    chunk = UInt32Col(pos=7)
-    alignmentPosition = Int64Col(pos=8)
-    alignmentNumber = UInt16Col(pos=9)
-    speciesPostion = Int64Col(pos=10)
+    maxstate = UInt16Col(pos=5) # state max prob
+    maxP = Float64Col(pos=6)  # map prob
+    chunk = UInt32Col(pos=7) # chunk this originates from
+    alignmentPosition = Int64Col(pos=8) (alignment pos)
+    alignmentNumber = UInt16Col(pos=9)  alignment nr
+    speciesPostion = Int64Col(pos=10)  # mapped species positioN
+    """
     
 #table scheme for lists of chunks
 class Lists(IsDescription):

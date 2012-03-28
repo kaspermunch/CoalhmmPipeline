@@ -14,10 +14,12 @@ def compressCoordinates(coords):
     count = 0
     total = 0
     
+    # create tmp table in same group as coordinates
     if "_compress_tmp_" in coords._v_parent:
         print "error: temporary table allready exists"
         return
         
+    # create table
     table = coords._v_file.createTable(coords._v_parent, "_compress_tmp_", SpeciesIntervalCoordinates, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
     buff = []
 
@@ -37,6 +39,7 @@ def compressCoordinates(coords):
             x_chr, x_strand, x_sp, x_alno, x_al = a.tolist()
             tabIdx += 1
     #####################
+            # is current pos NOT part of consequtive sequence of coordinates
             if chromosome != x_chr or \
                strand != x_strand or \
                alignmentNumber != x_alno or \
@@ -46,19 +49,23 @@ def compressCoordinates(coords):
                (end_al - start_al)**2 > (x_al - start_al)**2:
                 #emit row
                 if strand != 0: #test for first iteration
+                    # output to buffer
                     buff.append((chromosome, strand, alignmentNumber, start_sp, end_sp, start_al, end_al))
                     if len(buff) >= 10:
+                        # flush buffer
                         count = count + len(buff)
                         table.append(buff)
                         buff = []
 #                        print "processed", count, "total length", total, "reduction", float(count)/float(total)
 
+                # set new start parameters
                 chromosome = x_chr
                 strand = x_strand
                 alignmentNumber = x_alno
                 start_sp = x_sp
                 start_al = x_al
 
+            # update previous versions of parameters
             end_sp = x_sp
             end_al = x_al
             total = total +1
@@ -94,13 +101,17 @@ def compressCoordinates(coords):
 #         end_al = x_al
 #         total = total +1
         
+    # append last interval to buffer
     buff.append((chromosome, strand, alignmentNumber, start_sp, end_sp, start_al, end_al)) #assume number of rows in coords > 0
     print len(table)
     count = count + len(buff)
+    # flush buffer
     if len(buff) > 0:
         table.append(buff)
         #print "processed", count, "total length", total, "reduction", float(count)/float(total)
 #     print 'indexing'
+
+    # remove old table and rename tmp table
     name = coords._v_name
     coords._f_remove()
     table._f_rename(name)
