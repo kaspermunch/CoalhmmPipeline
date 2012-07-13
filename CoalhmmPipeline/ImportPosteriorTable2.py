@@ -1,3 +1,4 @@
+
 from tables import *
 from PipelineUtils import *
 from IntervalQuery import *
@@ -21,16 +22,25 @@ def createCoordinatesStructure(table, al):
 #posterior table file is a string containing a path to a posterior table file
 #alignmentNumber is an integer
 #listNumber is an integer representing the list used to make posterior table
-def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords):
-
+def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords, numberOfPostProbs=4):
     if "posteriors" not in hdf.root:
         hdf.createGroup(hdf.root, "posteriors")
     
     table = None
     if decodeChrName(alignmentNumber) in hdf.root.posteriors:
-        table = hdf.root.posteriors[decodeChrName(alignmentNumber)]
+        table = hdf.root.posteriors[decodeChrName(alignmentNumber)] #assume well shaped
     else:
-        table = hdf.createTable(hdf.root.posteriors, decodeChrName(alignmentNumber), Posteriors, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
+        scheme = dict()
+        for i in range(numberOfPostProbs):
+            scheme["V" + str(i)] = Float64Col(pos=(i+1))
+        scheme["maxstate"] = UInt16Col(pos=(numberOfPostProbs+1))
+        scheme["maxP"] = Float64Col(pos=(numberOfPostProbs+2))
+        scheme["chunk"] = UInt32Col(pos=(numberOfPostProbs+3))
+        scheme["alignmentPosition"] = Int64Col(pos=(numberOfPostProbs+4))
+        scheme["alignmentNumber"] = UInt16Col(pos=(numberOfPostProbs+5))
+        scheme["speciesPosition"] = Int64Col(pos=(numberOfPostProbs+6))
+        print scheme
+        table = hdf.createTable(hdf.root.posteriors, decodeChrName(alignmentNumber), scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
     data = open(posteriorTableFile)
 
     data.readline() #discard header
@@ -50,8 +60,8 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
             for alignmentPosition in range(prev_end, alignmentEnd):
                 tmp = data.readline().split(" ")
                 
-                states = [float(tmp[i]) for i in range(1, 5)]
-                tmpstates = [(float(tmp[i]), random(),  i-1) for i in range(1, 5)]
+                states = [float(tmp[i]) for i in range(1, numberOfPostProbs+1)]
+                tmpstates = [(float(tmp[i]), random(),  i-1) for i in range(1, numberOfPostProbs+1)]
                 tmpstates.sort()
                 (albegin, alend, spbegin, spend) = prev_coords
                 if not(albegin <= alignmentPosition <= alend):#a small optimization
@@ -63,12 +73,13 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
                 if spend == -1:
                     speciesPosition = -1
                     
-                buff.append((states[0], states[1], states[2], states[3], tmpstates[3][2], tmpstates[3][0], chunk, alignmentPosition, alignmentNumber, speciesPosition))
+                statescopy = [float(tmp[i]) for i in range(1, numberOfPostProbs+1)]
+                buff.append(tuple(statescopy) + (tmpstates[numberOfPostProbs-1][2], tmpstates[numberOfPostProbs-1][0], chunk, alignmentPosition, alignmentNumber, speciesPosition))
                 
                 if len(buff) >= 10000:
                     table.append(buff)
                     processed = processed + len(buff)
-                    #print "processed", processed, "per sec", (processed/(gettime() - starttime))
+                    print "processed", processed, "per sec", (processed/(gettime() - starttime))
                     del buff[:]
                     
             prev_end = alignmentEnd
@@ -78,6 +89,18 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
         processed = processed + len(buff)
 #        print "processed", processed, "per sec", (processed/(gettime() - starttime))
         buff = []
+
+
+
+def createCSIndexesOnSpeciesPosition(hdf, chrom):
+    """
+    Create completely sorted indexes on the speciesPosition column in the posteriors table
+    in the HDF.
+    """
+    if "speciesPosition" not in hdf.root.posteriors[chrom].colindexes or not hdf.root.posteriors[chrom].colindexes["speciesPosition"].is_CSI:
+        hdf.root.posteriors[chrom].cols.speciesPosition.createCSIndex()        
+
+
 
 """ example use
 hdf = openFile("/tmp/julien.h5", "a")        
