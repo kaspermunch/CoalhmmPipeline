@@ -1,3 +1,4 @@
+
 class MAF(object):
 
     def __init__(self, block=None):
@@ -14,6 +15,8 @@ class MAF(object):
                     self.alignment.append(l.split())
                 elif l.startswith("q"):
                     self.quality.append(l.split())
+        # sort by name
+        self.alignment.sort(key=lambda x: x[1].split(".")[0])
 
     def applyFilter(minScore, ignore=[]):
         """
