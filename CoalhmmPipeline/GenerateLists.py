@@ -7,6 +7,8 @@ import os
 def generateLists(alignmentNumber, size, hdf):
     list_entries = []
     chunking = [x.fetch_all_fields() for x in hdf.root.maps.main.where("(alignmentNumber=="+str(alignmentNumber) +") & (segment==1)")] #assume sorted
+    assert chunking
+
     list_start = -2*size
     curr_list = 0
     list_entry = 1
@@ -15,16 +17,21 @@ def generateLists(alignmentNumber, size, hdf):
             curr_list = curr_list+1
             list_start = begin
             list_entry = 1
-        list_entries.append((curr_list, list_entry, alignmentNumber, chunk))
+
+            # get start and end of entire chunk not just the first segment:
+            segments = [x.fetch_all_fields() for x in hdf.root.maps.main.where("(alignmentNumber==%d) & (chunk==%d)" % (alignmentNumber, chunk))]
+            _, _, _, _, _, beginLst, endLst = zip(*segments)
+            begin, end = min(beginLst), max(endLst)
+
+        list_entries.append((curr_list, list_entry, alignmentNumber, chunk, begin, end))
         list_entry = list_entry +1
         
     if "lists" not in hdf.root:
-#        print "creating lists table"
         hdf.createTable(hdf.root, "lists", Lists, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
     elif len([x for x in hdf.root.lists.where("alignmentNumber=="+str(alignmentNumber))]) > 0:
         print "Lists allready generated for alignment", alignmentNumber, "Aborting"
         return
-            
+
     hdf.root.lists.append(list_entries)
 
 def writeList(alignmentNumber, listNumber, hdf, filename, chunkdir):
@@ -34,7 +41,7 @@ def writeList(alignmentNumber, listNumber, hdf, filename, chunkdir):
     l = [x.fetch_all_fields() for x in hdf.root.lists.where("(alignmentNumber==" + str(alignmentNumber) +") & (listNumber==" + str(listNumber) +")")]
     if not chunkdir.endswith("/"):
         chunkdir = chunkdir + "/"
-    for (listNumber, listIndex, alignmentNumber, chunk) in l:
+    for (listNumber, listIndex, alignmentNumber, chunk, start, end) in l:
         f.write(chunkdir + str(alignmentNumber) + "." + str(chunk) + ".fasta\n")
     f.close()
     
@@ -47,9 +54,13 @@ def writeAllLists(alignmentNumber, hdf, chunkdir, listdir, outputFileTemplate=''
     for l in xrange(1, numberOfLists(alignmentNumber, hdf) +1):
 
         if outputFileTemplate:
-            fileName = outputFileTemplate % (alignmentNumber, str(l))
+            # FIXME: CHANGE HERE FOR NEW RUN
+            fileName = outputFileTemplate % (decodeChrName(alignmentNumber), str(l))
+            #fileName = outputFileTemplate % (alignmentNumber, str(l))
         else:
-            fileName = listdir + str(alignmentNumber) + "." + str(l) + ".txt"
+            # FIXME: CHANGE HERE FOR NEW RUN
+            fileName = listdir + str(decodeChrName(alignmentNumber)) + "." + str(l) + ".txt"
+            #fileName = listdir + str(alignmentNumber) + "." + str(l) + ".txt"
 
         writeList(alignmentNumber, l, hdf, fileName, chunkdir)
 
