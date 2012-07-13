@@ -30,7 +30,7 @@ class CoordinateError(Error):
         message:    explanation of the error
     """
     def __init__(self, expression, message):
-        self.message = expression
+        self.expression = expression
         self.message = message
         print self.expression, ": ", self.message
 
@@ -38,7 +38,7 @@ class CoordinateError(Error):
 #class responsible for the entire output
 #this is where nearly all the work goes
 class PytablesOutput:
-    def __init__(self, chunkDir, ingroup, tableHDF, alignmentNumber):
+    def __init__(self, chunkDir, ingroup, tableHDF, alignmentNumber, chunkFilePrefix=''):
         self.initialized = False
         self.nextChunk = 1 #internal counter to keep track if chunk numbering
         self.chunkDir = chunkDir #output directory for the chunked fasta files
@@ -52,7 +52,7 @@ class PytablesOutput:
         self.alignmentNo = alignmentNumber #alignment number stored together with the data, typically follows chromosome
         self.mafCount = 0 #running counter. Counts how many mafs have currently been processed.
                           #it is also used to give unique row ids to the maps
-            
+
         self.hdfFile = tableHDF
         #Create two groups
         if not ("maps" in self.hdfFile.root):
@@ -129,7 +129,7 @@ class PytablesOutput:
                 prevMAF = maf
                 self.appendToChunk(data, maf)
                 continue
-            
+
             ##insert gap between prevMAF and maf in output
             for i in range(maf.count()):
                 data[i].extend(self.getGap(prevMAF, maf, i))
@@ -143,6 +143,7 @@ class PytablesOutput:
         
         #write chunk as fasta
         chunkFile = self.openFile(self.chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
+
         for i in range(len(data)):
             chunkFile.write(">"+dataKeys[i]+"\n")
             chunkFile.write("".join(data[i]) + "\n\n") #todo: consider if it would be faster to skip the join
@@ -177,6 +178,7 @@ class PytablesOutput:
                 
             #append this position to the coordinate tables
             for i in self.ingroupIndexes:
+
                 if maf.data(i)[pos] == "-": #gap/nothing does not have a position in a species, so skip
                     continue #todo: make sure continue works on the innermost
                     
@@ -184,9 +186,13 @@ class PytablesOutput:
                     speciesPositionPlusStrand = maf.srcLength(i) - speciesPosition[i]
                 else:
                     speciesPositionPlusStrand = speciesPosition[i]
-                    
+
                 if speciesPositionPlusStrand < 0:
-                    raise CoordinateError("logically inconsistent input: sourcelength:", maf.srcLength(i), "position:", speciesPosition[i])
+                    # FIXME: had to take the exception out to allow juliens bug to pass for the non-refs
+                    if maf.name(i) == 'Hsap':
+                        print "logically inconsistent input for %s: sourcelength: %d position: %d"  % (name.name(i), maf.srcLength(i), speciesPosition[i])
+                    else:
+                        raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input: sourcelength: %d position: %d"  % (maf.srcLength(i), speciesPosition[i]))
                 
                 speciesPositionPlusStrand = speciesPositionPlusStrand & 0xFFFFFFFFFFFF #clamp to make fit in a 64 bit variable
                 
