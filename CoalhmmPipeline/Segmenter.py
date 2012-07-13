@@ -34,7 +34,9 @@ def createSegments(table):
     spend = spbegin
     state = -1
     buff = []
-    for r in table.iterrows():
+
+    #for r in table.iterrows():
+    for r in table.itersorted(table.cols.speciesPosition):
         (v0, v1, v2, v3, maxstate, maxP, chunk, alignmentPosition, alignmentNumber, speciesPosition) = r.fetch_all_fields()
         
 #         if processed % 10000 == 0:
