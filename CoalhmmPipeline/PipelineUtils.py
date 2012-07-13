@@ -59,7 +59,7 @@ class SpeciesIntervalCoordinates(IsDescription): # coords.<speciesname> same as 
     alignmentPositionEnd = Int64Col(pos=7)
     
 #Table scheme for storing posterior probs
-"""class Posteriors(IsDescription): # posteriors.<speciesname> 
+class Posteriors(IsDescription): # posteriors.<speciesname> 
     V0 = Float64Col(pos=1) # state 0
     V1 = Float64Col(pos=2) # etc...
     V2 = Float64Col(pos=3)
@@ -67,10 +67,9 @@ class SpeciesIntervalCoordinates(IsDescription): # coords.<speciesname> same as 
     maxstate = UInt16Col(pos=5) # state max prob
     maxP = Float64Col(pos=6)  # map prob
     chunk = UInt32Col(pos=7) # chunk this originates from
-    alignmentPosition = Int64Col(pos=8) (alignment pos)
-    alignmentNumber = UInt16Col(pos=9)  alignment nr
-    speciesPostion = Int64Col(pos=10)  # mapped species positioN
-    """
+    alignmentPosition = Int64Col(pos=8) # (alignment pos)
+    alignmentNumber = UInt16Col(pos=9)  # alignment nr
+    speciesPosition = Int64Col(pos=10)  # mapped species positioN
     
 #table scheme for lists of chunks
 class Lists(IsDescription):
@@ -78,6 +77,9 @@ class Lists(IsDescription):
     listIndex = UInt32Col(pos=2)
     alignmentNumber = UInt16Col(pos=3)
     chunk = UInt32Col(pos=4)
+    alignmentPositionBegin = Int64Col(pos=5)
+    alignmentPositionEnd = Int64Col(pos=6)
+
 
 #table scheme for segments
 class Segments(IsDescription):
