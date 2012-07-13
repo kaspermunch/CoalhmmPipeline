@@ -37,6 +37,47 @@ class Annotation:
     	if chrom not in self.annotation:
 	    return False
     	return self._contains(chrom, position, 0, len(self.annotation[chrom]))
+
+"""
+    def contains(self, chrom, position):
+    	if chrom not in self.annotation:
+	    return False
+    	return self._contains(self.annotation[chrom], position, startIdx=1, endIdx=2)
+
+    def _contains(lst, pos, startIdx, endIdx, lo=0, hi=None):
+        if hi is None:
+            hi = len(lst)
+        while lo < hi:
+            mid = (lo+hi)//2
+            start, end = lst[mid][startIdx, endIdx] # <- change to extraction of pos value here
+            if end <= pos:
+                lo = mid+1
+            elif start > pos: 
+                hi = mid
+            else:
+                return True
+        return False
+"""
+
+#     def binary_search(a, x, lo=0, hi=None):
+#         if hi is None:
+#             hi = len(a)
+#         while lo < hi:
+#             mid = (lo+hi)//2
+#             midval = a[mid] # <- change to extraction of pos value here
+#             if midval < x:
+#                 lo = mid+1
+#             elif midval > x: 
+#                 hi = mid
+#             else:
+#                 return mid
+#         return -1
+#     # depending on whether the upper bound is inclusive or exclusive.
+#     # you can change hi = mid to hi = mid-1 and hi = len(a) to hi = len(a)-1 and while lo < hi: to while lo <= hi,
+#     # and it would be equivalently correct 
+
+
+
     
 # class Annotation:
 # 	def __init__(self, annotationFileName):
