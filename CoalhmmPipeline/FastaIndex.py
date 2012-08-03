@@ -205,7 +205,8 @@ if __name__ == "__main__":
         print ">%s_%d_%d" % (name, start, length)
         for i in range(lines):
             print seq[i*width:i*width+width]
-        print seq[-remainder:]
+        if remainder:
+            print seq[-remainder:]
         
 #     print idx.get("50262771", 0, 60)
 #     print idx.get("70608782", 3, 10)
