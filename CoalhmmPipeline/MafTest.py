@@ -6,7 +6,7 @@ class MafTest(object):
         self.speciesList = sorted(speciesList)
 
     def test(self, maf):
-        return self.speciesList == [maf.name(i) for i in range(maf.count())]
+        return self.speciesList == sorted([maf.name(i) for i in range(maf.count())])
 
         
 
