@@ -12,7 +12,11 @@ class MAF(object):
                 if l.startswith("a"):
                     self.annotation = l
                 elif l.startswith("s"):
-                    self.alignment.append(l.split())
+                    lst = l.split()
+                    if len(lst) == 6:
+                        # there was no sequence
+                        lst.append('')
+                    self.alignment.append(lst)
                 elif l.startswith("q"):
                     self.quality.append(l.split())
         # sort by name
@@ -35,7 +39,7 @@ class MAF(object):
     	
     def name(self, idx):
     	return self.alignment[idx][1].split(".")[0]
-    	
+
     def chromosome(self, idx):
     	tmp = self.alignment[idx][1].split(".")
     	if len(tmp) > 1:
@@ -51,7 +55,7 @@ class MAF(object):
     	return int(self.alignment[idx][2])
     	
     def size(self, idx):
-    	return len(self.data(0))
+    	return len(self.data(idx))
 
     def length(self, idx):
     	return int(self.alignment[idx][3])
@@ -146,7 +150,6 @@ def MAFIterator(fileob):
             return
 
         where += seplen
-        
         yield MAF(block[:where])
         block = block[where:]
 
