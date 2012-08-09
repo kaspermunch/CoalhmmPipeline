@@ -69,7 +69,7 @@ class Posteriors(IsDescription): # posteriors.<speciesname>
     chunk = UInt32Col(pos=7) # chunk this originates from
     alignmentPosition = Int64Col(pos=8) # (alignment pos)
     alignmentNumber = UInt16Col(pos=9)  # alignment nr
-    speciesPosition = Int64Col(pos=10)  # mapped species positioN
+    speciesPosition = Int64Col(pos=10)  # mapped species position 
     
 #table scheme for lists of chunks
 class Lists(IsDescription):
