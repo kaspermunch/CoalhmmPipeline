@@ -1,8 +1,9 @@
 from MAF import *
 
 class IngroupTruncater:
-    def __init__(self, ingroup):
+    def __init__(self, ingroup, junkchars):
         self.ingroup = ingroup
+        self.junkchars = junkchars
         
     def truncate(self, maf):
         out = "a score=%f\n" % maf.score()
@@ -15,7 +16,7 @@ class IngroupTruncater:
                 if maf.name(j) not in self.ingroup:
                     continue
                     
-                if maf.data(j)[i] in "N-":
+                if maf.data(j)[i] in self.junkchars:
                     ns = ns +1
                     
             if ns == len(self.ingroup):
@@ -30,7 +31,7 @@ class IngroupTruncater:
                 if maf.name(j) not in self.ingroup:
                     continue
                     
-                if maf.data(j)[i] in "N-":
+                if maf.data(j)[i] in self.junkchars:
                     ns = ns +1
                     
             if ns == len(self.ingroup):
