@@ -8,12 +8,17 @@
 
 #class deciding whether or not two mafs should be merged
 class IngroupMergeCriteria:
-	def __init__(self, maxGap, inGroup):
+	def __init__(self, maxGap, inGroup, maxSize=float('inf')):
 		self.maxGap = maxGap
 		self.inGroup = inGroup
+		self.maxSize = maxSize
 	
 	#says true if they should be merged	
 	def shouldMerge(self, maf1, maf2):
+
+		if maf1.size(0) + maf2.size(0) > self.maxSize:
+			return False
+		
 		for i in range(maf1.count()):
 			assert maf1.name(i) == maf2.name(i)
 			
