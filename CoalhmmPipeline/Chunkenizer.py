@@ -61,8 +61,7 @@ class Chunkenizer:
 
 
 			if not self.mafTest.test(maf):
-  				print 'MAF entry failed test:'
-  				print maf
+#  				print maf
 				continue
 
 			#split maf and put it on the processing que
@@ -72,7 +71,7 @@ class Chunkenizer:
 				splitmaf = self.truncater.truncate(splitmaf)
 				#print splitmaf
 				#raw_input("press enter")    
-			
+				
 				if splitmaf != None and self.acceptMaf(splitmaf):
 					q.append(splitmaf)
 			
