@@ -1,0 +1,113 @@
+alphabet=DNA
+input.sequence.multiparts=yes
+
+input.sequence.multiparts.reset=yes
+
+input.sequence.file=
+input.sequence.format=Fasta
+
+input.sequence.sites_to_use=all
+input.sequence.max_gap_allowed=101%
+
+//This is the standard ILS model with the model:
+coalmethod=ILS(\
+    implementation=09,\
+    nbSpecies=3,\
+    species1=$(species1),\
+    species2=$(species2),\
+    species3=$(species3),\
+    outgroup=$(outgroup),\
+    tau1=0.004,\
+    tau2=0.0015,\
+    c2=0.010,\
+    theta1=0.002,\
+    theta2=0.002,\
+    median=no,\
+    rho=0.2,\
+    tau.min = 0.0001,\
+    theta.min = 0.0001,\
+    rho.min = 0.0001,\
+    rho.max = 1000\
+  )
+ 
+//Emission probabilities options:
+model=GTR(a=1.0, b=1.0, c=1.0, d=1.0, e=1.0, theta=0.5, theta1 = 0.5, theta2 = 0.5) 
+rate_distribution=Gamma(n=4, alpha=1.0)
+
+//Now perform analysis:
+analysis=estimate
+
+optimize=yes
+optimization.method=fullD
+optimization.reparametrization=no
+optimization.verbose=2
+optimization.tolerance=0.0001
+optimization.max_number_f_eval=1000000
+optimization.max_number_iterations=2000
+optimization.profiler=
+optimization.message_handler=
+optimization.pre=yes
+optimization.ignore_parameter=GTR.a,GTR.b,GTR.c,GTR.d,GTR.e,GTR.theta,GTR.theta1,GTR.theta2
+optimization.final=no
+
+output.posterior.states=
+output.posterior.values=
+output.estimated.parameters=
+output.userfriendly.parameters=
+
+
+
+// alphabet=DNA
+// input.sequence.multiparts=yes
+// 
+// input.sequence.multiparts.reset=yes
+// 
+// input.sequence.file=
+// input.sequence.format=Fasta
+// 
+// input.sequence.sites_to_use=all
+// input.sequence.max_gap_allowed=101%
+// 
+// //This is the standard ILS model with the 09 reparametrization:
+// coalmethod=ILS(\
+//     implementation=09,\
+//     nbSpecies=3,\
+//     species1=bonobo,\
+//     species2=pantro2,\
+//     species3=hg18,\
+//     outgroup=ponabe2,\
+//     tau1=0.004,\
+//     tau2=0.0015,\
+//     c2=0.010,\
+//     theta1=0.002,\
+//     theta2=0.002,\
+//     median=no,\
+//     rho=0.2\
+//   )
+// 
+// //Emission probabilities options:
+// model=GTR(a=1.0, b=1.0, c=1.0, d=1.0, e=1.0, theta=0.5, theta1 = 0.5, theta2 = 0.5) 
+// rate_distribution=Gamma(n=4, alpha=1.0)
+// 
+// //Now perform analysis:
+// analysis=estimate
+// 
+// optimize=yes
+// optimization.method=fullD
+// optimization.reparametrization=no
+// optimization.verbose=2
+// optimization.tolerance=0.0001
+// optimization.max_number_f_eval=1000000
+// optimization.max_number_iterations=2000
+// optimization.profiler=
+// optimization.message_handler=
+// optimization.pre=yes
+// optimization.ignore_parameter=GTR.a,GTR.b,GTR.c,GTR.d,GTR.e,GTR.theta,GTR.theta1,GTR.theta2
+// optimization.final=no
+// 
+// output.posterior.states=
+// output.posterior.values=
+// output.estimated.parameters=
+// output.userfriendly.parameters=
+// 
+
