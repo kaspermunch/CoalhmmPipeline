@@ -97,12 +97,17 @@ class PytablesOutput:
         if not self.initialized:
             self.initialize(mafs[0])
             self.initialized = True
-    
+
         #report progress
 #         print "merging", len(mafs), "mafs, total processed", self.mafCount
     
         self.segment = 1 #reset segment counter! we are starting on a new chunk!
+
+#         for m in mafs:
+#             print 'PytablesOutput, chunk len:', m.size(0)
+
         self.writeFasta(mafs) #todo: consider inlining this... it's 30 lines of code
+
         self.nextChunk = self.nextChunk +1 
         
     def finalize(self):
@@ -140,14 +145,20 @@ class PytablesOutput:
             self.appendToChunk(data, maf)
                     
             prevMAF = maf
-        
+
         #write chunk as fasta
-        chunkFile = self.openFile(self.chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
+        subdirName = "%d/%d" % (self.alignmentNo, self.nextChunk/500) # needs to fit same formula in GenerateLists.py
+        chunkDir = os.path.join(self.chunkDir, subdirName)
+        if not os.path.exists(subdirName):
+            os.makedirs(subdirName)
+        chunkFile = self.openFile(chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
+#         #write chunk as fasta
+#         chunkFile = self.openFile(self.chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
 
         for i in range(len(data)):
             chunkFile.write(">"+dataKeys[i]+"\n")
             chunkFile.write("".join(data[i]) + "\n\n") #todo: consider if it would be faster to skip the join
-        #todo: consider closing the file...
+        chunkFile.close()
     
     def appendToChunk(self, data, maf):
         #add to table where in the alignment we start

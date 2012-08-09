@@ -12,12 +12,13 @@ def generateLists(alignmentNumber, size, hdf):
     list_start = -2*size
     curr_list = 0
     list_entry = 1
+    # FIXME: should we start a new list when we change chromosome?
     for (colId, alno, chunk, segment, score, begin, end) in chunking:
         if(begin - list_start > size):
             curr_list = curr_list+1
             list_start = begin
             list_entry = 1
-
+            
             # get start and end of entire chunk not just the first segment:
             segments = [x.fetch_all_fields() for x in hdf.root.maps.main.where("(alignmentNumber==%d) & (chunk==%d)" % (alignmentNumber, chunk))]
             _, _, _, _, _, beginLst, endLst = zip(*segments)
@@ -41,6 +42,7 @@ def writeList(alignmentNumber, listNumber, hdf, filename, chunkdir):
     l = [x.fetch_all_fields() for x in hdf.root.lists.where("(alignmentNumber==" + str(alignmentNumber) +") & (listNumber==" + str(listNumber) +")")]
     if not chunkdir.endswith("/"):
         chunkdir = chunkdir + "/"
+    chunkdir += "%d/%d/" % (alignmentNumber, int(chunk)/500)  # needs to fit same formula in PytablesOutput.py
     for (listNumber, listIndex, alignmentNumber, chunk, start, end) in l:
         f.write(chunkdir + str(alignmentNumber) + "." + str(chunk) + ".fasta\n")
     f.close()
