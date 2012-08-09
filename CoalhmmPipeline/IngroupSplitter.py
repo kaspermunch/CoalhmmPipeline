@@ -1,9 +1,10 @@
 from MAF import MAF
 
 class IngroupSplitter:
-    def __init__(self, ingroup, splitdist):
+    def __init__(self, ingroup, splitdist, junkchars='Nn-'):
         self.ingroup = ingroup
         self.splitdist = splitdist
+        self.junkchars = junkchars
     
     #return a list of mafs representing the old mafs that have split
     #or a list containing just the original maf if no splitting is required    
@@ -16,7 +17,9 @@ class IngroupSplitter:
         out_pos = []
         outdex = []
         outdir = []
+
         for i in range(maf.count()):
+
             if maf.name(i) in self.ingroup:
                 in_al.append(maf.data(i))
                 in_pos.append(maf.start(i))
@@ -42,7 +45,7 @@ class IngroupSplitter:
                 if in_al[j][i] not in "-":
                     in_pos[j] = in_pos[j] +1
                 
-                if in_al[j][i] in 'N-':
+                if in_al[j][i] in self.junkchars:
                     ns = ns + indir[j]
                     
             for j in range(len(out_al)):
@@ -89,15 +92,19 @@ class IngroupSplitter:
                     size = maf.length(ind) - (start - maf.start(ind))
                     maf2 += "s %s.%s %i %i %s %i %s\n" % (maf.name(ind), maf.chromosome(ind), start, size, maf.strand(ind), maf.srcLength(ind), maf.data(ind)[i:])    
                 gapcount = 0
-                
+
                 tmpmaf = MAF(maf1)
                 res = []
                 
                 if(len(tmpmaf.data(0)) > 0):
                     res.append(tmpmaf)
-                
-                for m in self.split(MAF(maf2)):
-                    res.append(m)
+
+                tmpmaf2 = MAF(maf2)
+                if(len(tmpmaf2.data(0)) > 0):
+                    for m in self.split(tmpmaf2):
+                        res.append(m)
+#                 for m in self.split(MAF(maf2)):
+#                     res.append(m)
                     
                 return res
         
