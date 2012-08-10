@@ -42,9 +42,9 @@ def writeList(alignmentNumber, listNumber, hdf, filename, chunkdir):
     l = [x.fetch_all_fields() for x in hdf.root.lists.where("(alignmentNumber==" + str(alignmentNumber) +") & (listNumber==" + str(listNumber) +")")]
     if not chunkdir.endswith("/"):
         chunkdir = chunkdir + "/"
-    chunkdir += "%d/%d/" % (alignmentNumber, int(chunk)/500)  # needs to fit same formula in PytablesOutput.py
     for (listNumber, listIndex, alignmentNumber, chunk, start, end) in l:
-        f.write(chunkdir + str(alignmentNumber) + "." + str(chunk) + ".fasta\n")
+        subDir = "%d/%d/" % (alignmentNumber, int(chunk)/500)  # needs to fit same formula in PytablesOutput.py
+        f.write(chunkdir + subDir + str(alignmentNumber) + "." + str(chunk) + ".fasta\n")
     f.close()
     
 def numberOfLists(alignmentNumber, hdf):
