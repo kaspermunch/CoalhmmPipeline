@@ -1,7 +1,7 @@
 from MAF import *
 
 class IngroupTruncater:
-    def __init__(self, ingroup, junkchars):
+    def __init__(self, ingroup, junkchars='Nn-'):
         self.ingroup = ingroup
         self.junkchars = junkchars
         
