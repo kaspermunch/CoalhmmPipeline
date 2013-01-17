@@ -32,7 +32,6 @@ class CoordinateError(Error):
     def __init__(self, expression, message):
         self.expression = expression
         self.message = message
-        print self.expression, ": ", self.message
 
 
 #class responsible for the entire output
@@ -191,7 +190,7 @@ class PytablesOutput:
             for i in self.ingroupIndexes:
 
                 if maf.data(i)[pos] == "-": #gap/nothing does not have a position in a species, so skip
-                    continue #todo: make sure continue works on the innermost
+                    continue
                     
                 if maf.strand(i) == "-": #all coordinates in the table should be on the plus strand
                     speciesPositionPlusStrand = maf.srcLength(i) - speciesPosition[i]
@@ -199,11 +198,13 @@ class PytablesOutput:
                     speciesPositionPlusStrand = speciesPosition[i]
 
                 if speciesPositionPlusStrand < 0:
-                    # FIXME: had to take the exception out to allow juliens bug to pass for the non-refs
-                    if maf.name(i) == 'Hsap':
-                        print "logically inconsistent input for %s: sourcelength: %d position: %d"  % (name.name(i), maf.srcLength(i), speciesPosition[i])
-                    else:
-                        raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input: sourcelength: %d position: %d"  % (maf.srcLength(i), speciesPosition[i]))
+#                    raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n\tname: %s\n\tsourcelength:\n\t%d position: %d\n"  % (maf.name(self.ingroupIndexes.append(i)), maf.srcLength(i), speciesPosition[i]))
+                    raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n%s\n" % '\n'.join([x[:80] for x in str(maf).split('\n')]))
+#                     # FIXME: had to take the exception out to allow juliens bug to pass for the non-refs
+#                     if maf.name(i) == 'Hsap':
+#                         print "logically inconsistent input for %s: sourcelength: %d position: %d"  % (name.name(i), maf.srcLength(i), speciesPosition[i])
+#                     else:
+#                         raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input: sourcelength: %d position: %d"  % (maf.srcLength(i), speciesPosition[i]))
                 
                 speciesPositionPlusStrand = speciesPositionPlusStrand & 0xFFFFFFFFFFFF #clamp to make fit in a 64 bit variable
                 
