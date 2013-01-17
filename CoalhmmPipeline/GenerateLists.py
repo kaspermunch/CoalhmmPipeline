@@ -7,7 +7,7 @@ import os
 def generateLists(alignmentNumber, size, hdf):
     list_entries = []
     chunking = [x.fetch_all_fields() for x in hdf.root.maps.main.where("(alignmentNumber=="+str(alignmentNumber) +") & (segment==1)")] #assume sorted
-    assert chunking
+    assert chunking, "no chunks for " + str(alignmentNumber)
 
     list_start = -2*size
     curr_list = 0
