@@ -33,7 +33,7 @@ def compressCoordinates(coords):
         data = coords.read(tabIdx, tabIdx+chunk)
         if not len(data):
             break
-        print tabIdx, time() - t
+#        print tabIdx, time() - t
         t = time()
         for a in data:
             x_chr, x_strand, x_sp, x_alno, x_al = a.tolist()
@@ -103,7 +103,7 @@ def compressCoordinates(coords):
         
     # append last interval to buffer
     buff.append((chromosome, strand, alignmentNumber, start_sp, end_sp, start_al, end_al)) #assume number of rows in coords > 0
-    print len(table)
+#    print len(table)
     count = count + len(buff)
     # flush buffer
     if len(buff) > 0:
