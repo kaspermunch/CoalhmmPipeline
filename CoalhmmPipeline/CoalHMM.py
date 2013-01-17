@@ -9,8 +9,9 @@ import subprocess
 
 class CoalHMM(object):
 
-    def __init__(self, optionsFileName, ingroup, outgroup):#, coalHMMdir):
+    def __init__(self, optionsFileName, ingroup, outgroup, **parameters):#, coalHMMdir):
         self.optionsFileName = optionsFileName
+        self.parameters = parameters
 #        self.coalHMMdir = coalHMMdir
         self.success = True
 
@@ -18,7 +19,9 @@ class CoalHMM(object):
 
     def run(self, listFileName, outputFilePrefix):
 
-        cmd = "./coalhmm --noninteractive=yes param=OPTIONSFILE %s input.sequence.list=LISTFILE input.sequence.multiparts.prefix= input.sequence.multiparts.reset=yes optimization.profiler=BASENAME.profiler optimization.message_handler=BASENAME.messages output.posterior.states=none output.hidden_states=BASENAME.states output.hidden_states.divergences=BASENAME.divergences output.posterior.values=BASENAME.posteriors output.estimated.parameters=BASENAME.params output.userfriendly.parameters=BASENAME.estimates" % self.speciesSpec
+        extraArgs = ' '.join(['='.join(map(str, t)) for t in self.parameters.items()])
+
+        cmd = "./coalhmm --noninteractive=yes param=OPTIONSFILE %s input.sequence.list=LISTFILE input.sequence.multiparts.prefix= input.sequence.multiparts.reset=yes optimization.profiler=BASENAME.profiler optimization.message_handler=BASENAME.messages output.posterior.states=none output.hidden_states=BASENAME.states output.hidden_states.divergences=BASENAME.divergences output.posterior.values=BASENAME.posteriors output.estimated.parameters=BASENAME.params output.userfriendly.parameters=BASENAME.estimates %s" % (self.speciesSpec, extraArgs)
 
         cmd = cmd.replace('BASENAME', outputFilePrefix).replace('LISTFILE', os.path.abspath(listFileName)).replace('OPTIONSFILE', os.path.abspath(self.optionsFileName))
 
