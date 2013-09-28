@@ -62,7 +62,7 @@ class PytablesOutput:
         #we know we are going to need this table, so we will create it now
         if not ("main" in self.hdfFile.root.maps):
             self.hdfFile.createTable(self.hdfFile.root.maps, "main", MainChunkMap)
-    
+
     #We don't know what the mafs will look like until we get the first one
     #here we initialize some structures to help output the result
     def initialize(self, maf):
@@ -73,7 +73,7 @@ class PytablesOutput:
         for i in range(maf.count()):
             if maf.name(i) in self.ingroup:
                 self.ingroupIndexes.append(i)
-        
+
         
         #it takes a long time to look up tables by their name
         #so we store a reference in a list    
@@ -136,7 +136,17 @@ class PytablesOutput:
 
             ##insert gap between prevMAF and maf in output
             for i in range(maf.count()):
-                data[i].extend(self.getGap(prevMAF, maf, i))
+                data[i].extend(self.getGap(prevMAF, maf, i)) # FIXME: getGap takes max gap not gap for i (fine if only if they are always the same...)
+
+# #######################################################
+#                 # FIXME: here we should add the gap to the beginning of the maf before appending to chunk
+#                 gap = self.getGap(prevMAF, maf, i)
+#                 mafstr = ''
+#                 for j in  range(maf.count()):
+#                     mafstr += "s %s.%s %i %i %s %i %s\n" % (maf.name(j), maf.chromosome(j), maf.end(j), len(gap), maf.strand(j), maf.srcLength(j), gap)
+#                 maf.prepend(MAF(mafstr))
+# #######################################################
+                
             
             self.currentPosition += len(self.getGap(prevMAF, maf, 0)) #update the alignment position according to this gap
             
@@ -148,8 +158,6 @@ class PytablesOutput:
         #write chunk as fasta
         subdirName = "%d/%d" % (self.alignmentNo, self.nextChunk/500) # needs to fit same formula in GenerateLists.py
         chunkDir = os.path.join(self.chunkDir, subdirName)
-        if not os.path.exists(subdirName):
-            os.makedirs(subdirName)
         chunkFile = self.openFile(chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
 #         #write chunk as fasta
 #         chunkFile = self.openFile(self.chunkDir, str(self.alignmentNo) + "."+ str(self.nextChunk) + ".fasta") #open a file to write out the fasta
@@ -198,8 +206,13 @@ class PytablesOutput:
                     speciesPositionPlusStrand = speciesPosition[i]
 
                 if speciesPositionPlusStrand < 0:
-#                    raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n\tname: %s\n\tsourcelength:\n\t%d position: %d\n"  % (maf.name(self.ingroupIndexes.append(i)), maf.srcLength(i), speciesPosition[i]))
-                    raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n%s\n" % '\n'.join([x[:80] for x in str(maf).split('\n')]))
+                   raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n%s\n" % '\n'.join([x[:80] for x in str(maf).split('\n')]))
+                    
+#                     # had to condition the exception because only Hsap coordinates are checked in Kays bonobo alignments. 
+#                     if maf.name(i) == 'Hsap':
+#                         raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input: sourcelength: %d position: %d"  % (maf.srcLength(i), speciesPosition[i]))
+
+
 #                     # FIXME: had to take the exception out to allow juliens bug to pass for the non-refs
 #                     if maf.name(i) == 'Hsap':
 #                         print "logically inconsistent input for %s: sourcelength: %d position: %d"  % (name.name(i), maf.srcLength(i), speciesPosition[i])
@@ -214,7 +227,6 @@ class PytablesOutput:
                     intstrand = 1
                 else:
                     intstrand = -1
-                    
                 self.coordinateTables[i].append((encodeChrName(maf.chromosome(i)),  intstrand, int(speciesPositionPlusStrand), self.alignmentNo, int(self.currentPosition)))    #append to coordinate table
                 speciesPosition[i] += 1
             
