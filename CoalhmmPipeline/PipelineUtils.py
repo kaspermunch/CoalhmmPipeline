@@ -4,14 +4,18 @@ Node.__getitem__ = lambda self, key : self._f_getChild(key)
 ##end of patch
 
 def encodeChrName(name):
+    assert name is not None 
+    #if name[0:3].lower() in ("chr", "scf"):
     if name[0:3].lower() == "chr":
 	name = name[3:]
     if name.isdigit():
 	return int(name)
     if len(name) == 1:
-	return ord(name.upper())
+	#return ord(name.upper())
+        return ord(name)
     if len(name) == 2:
-	return ord(name[1].upper()) * 256 + ord(name[0].upper())
+	#return ord(name[1].upper()) * 256 + ord(name[0].upper())
+        return ord(name[1]) * 256 + ord(name[0])
     return 0
 
 def decodeChrName(number):
@@ -19,8 +23,10 @@ def decodeChrName(number):
 	return 'chr' + str(number)
     if number < 256: # one letter
         return 'chr' + chr(number)
-    return 'chr' + chr(number % 256) + chr(number / 256)
-
+    if number < ord('z') * 256 + ord('z'): # a chrom name
+        return 'chr' + chr(number % 256) + chr(number / 256)
+    else:
+        return 'scf' + str(number)
 
 #table scheme for main map table
 class MainChunkMap(IsDescription): # maps.main
