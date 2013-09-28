@@ -39,7 +39,7 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
         scheme["alignmentPosition"] = Int64Col(pos=(numberOfPostProbs+4))
         scheme["alignmentNumber"] = UInt16Col(pos=(numberOfPostProbs+5))
         scheme["speciesPosition"] = Int64Col(pos=(numberOfPostProbs+6))
-        print scheme
+        ## print scheme
         table = hdf.createTable(hdf.root.posteriors, decodeChrName(alignmentNumber), scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
     data = open(posteriorTableFile)
 
@@ -79,7 +79,7 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
                 if len(buff) >= 10000:
                     table.append(buff)
                     processed = processed + len(buff)
-                    print "processed", processed, "per sec", (processed/(gettime() - starttime))
+                    ## print "processed", processed, "per sec", (processed/(gettime() - starttime))
                     del buff[:]
                     
             prev_end = alignmentEnd
