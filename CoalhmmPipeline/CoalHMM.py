@@ -9,7 +9,8 @@ import subprocess
 
 class CoalHMM(object):
 
-    def __init__(self, optionsFileName, ingroup, outgroup, **parameters):#, coalHMMdir):
+    def __init__(self, executable, optionsFileName, ingroup, outgroup, **parameters):#, coalHMMdir):
+        self.executable = executable
         self.optionsFileName = optionsFileName
         self.parameters = parameters
 #        self.coalHMMdir = coalHMMdir
@@ -21,7 +22,10 @@ class CoalHMM(object):
 
         extraArgs = ' '.join(['='.join(map(str, t)) for t in self.parameters.items()])
 
-        cmd = "./coalhmm --noninteractive=yes param=OPTIONSFILE %s input.sequence.list=LISTFILE input.sequence.multiparts.prefix= input.sequence.multiparts.reset=yes optimization.profiler=BASENAME.profiler optimization.message_handler=BASENAME.messages output.posterior.states=none output.hidden_states=BASENAME.states output.hidden_states.divergences=BASENAME.divergences output.posterior.values=BASENAME.posteriors output.estimated.parameters=BASENAME.params output.userfriendly.parameters=BASENAME.estimates %s" % (self.speciesSpec, extraArgs)
+#         # add executable dir name to LD path in case library files are there:
+#         os.environ['LD_LIBRARY_PATH'] += ':' + os.path.dirname(self.executable)
+
+        cmd = "%s --noninteractive=yes param=OPTIONSFILE %s input.sequence.list=LISTFILE input.sequence.multiparts.prefix= input.sequence.multiparts.reset=yes optimization.profiler=BASENAME.profiler optimization.message_handler=BASENAME.messages output.posterior.states=none output.hidden_states=BASENAME.states output.hidden_states.divergences=BASENAME.divergences output.posterior.values=BASENAME.posteriors output.estimated.parameters=BASENAME.params output.userfriendly.parameters=BASENAME.estimates %s" % (self.executable, self.speciesSpec, extraArgs)
 
         cmd = cmd.replace('BASENAME', outputFilePrefix).replace('LISTFILE', os.path.abspath(listFileName)).replace('OPTIONSFILE', os.path.abspath(self.optionsFileName))
 
