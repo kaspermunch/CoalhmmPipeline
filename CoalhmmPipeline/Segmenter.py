@@ -27,37 +27,83 @@ def createSegments(table):
     #create table
     dst = hdf.createTable(root.segments, name, Segments)
 
-    processed = 0
-    albegin = 0
-    alend = 0
-    spbegin = -123
-    spend = spbegin
-    state = -1
+#     state = None
+#     buff = []
+#     lastposSpecies = -1
+#     lastposAln = -1
+
+    prevState = None
     buff = []
 
     #for r in table.iterrows():
     for r in table.itersorted(table.cols.speciesPosition):
-        (v0, v1, v2, v3, maxstate, maxP, chunk, alignmentPosition, alignmentNumber, speciesPosition) = r.fetch_all_fields()
+        (_, _, _, _, maxstate, maxP, chunk, alignmentPosition, alignmentNumber, speciesPosition) = r.fetch_all_fields()
+
+        if speciesPosition == -1:
+            continue # coord does not map to a speciesPosition in that species
+
+        # first pos
+        if prevState is None:
+            segmentSpeciesStart = speciesPosition
+            segmentAlnStart = alignmentPosition
+            segmentSpeciesEnd = speciesPosition + 1
+            segmentAlnEnd = alignmentPosition + 1
+            prevState = maxstate
+            continue
         
-#         if processed % 10000 == 0:
-#             print "processed", processed
-            
-        processed = processed +1
-        
-        if state != maxstate or abs(speciesPosition - spend) != 1: #assumes case 1 2 3 2 case does not exist
-            if state != -1: # simple test if we are in a valid interval (not in first run)
-                buff.append((albegin, alend+1, spbegin, spend+1, state)) #emit interval (+1 to make interval [,[ instead of [,])
-                
-            spbegin = speciesPosition
-            albegin = alignmentPosition
-            state = maxstate
-        
-        spend = speciesPosition
-        alend = alignmentPosition
-        
-        if len(buff) > 10000: #write to table so we do not thrash memory
+        # gap or change of max state (not evaluated in first loop)
+        if speciesPosition > segmentSpeciesEnd or prevState != maxstate:
+            buff.append((segmentAlnStart, segmentAlnEnd, segmentSpeciesStart, segmentSpeciesEnd, prevState))
+            segmentSpeciesStart = speciesPosition
+            segmentAlnStart = alignmentPosition
+
+        # increment segment ends
+        segmentSpeciesEnd = speciesPosition + 1
+        segmentAlnEnd = alignmentPosition + 1        
+        prevState = maxstate
+
+        # write to table so we do not thrash memory
+        if len(buff) > 10000:
             dst.append(buff)
             buff = []
-            
-    buff.append((albegin, alend+1, spbegin, spend+1, state)) #add last interval
-    dst.append(buff) #write to table    
+
+    # add last segment and flush buffer
+    buff.append((segmentAlnStart, segmentAlnEnd, segmentSpeciesStart, segmentSpeciesEnd, prevState))
+    dst.append(buff) # write to table
+        
+        
+#         if speciesPosition == -1:
+#             continue # coord does not map to a speciesPosition in that species
+# 
+#         if state is None:
+#             state = maxstate
+#             startSpecies = speciesPosition
+#             startAln = alignmentPosition
+#             continue
+# 
+#         assert lastposSpecies < speciesPosition
+# 
+#         # start new segment if there is a gap (unless this is the first loop):
+#         if speciesPosition > lastposSpecies + 1 and not lastposSpecies == -1:
+#             buf.append((startAln, lastposAln+1, startSpecies, lastposSpecies+1, state))
+#             startSpecies = speciesPosition
+#             startAln = speciesAln
+# 
+#         lastposSpecies = speciesPosition
+#         lastposAln = speciesAln
+# 
+#         # start new segment if there is a change to a new state:
+#         if state != maxstate:                    
+#             buf.append((startAln, lastposAln+1, startSpecies, lastposSpecies+1, state))
+#             startSpecies = speciesPosition
+#             startAln = speciesAln
+#             state = maxstate
+# 
+#         if len(buff) > 10000: #write to table so we do not thrash memory
+#             dst.append(buff)
+#             buff = []
+# 
+#     buf.append((startAln, lastposAln+1, startSpecies, lastposSpecies+1, state))
+#     dst.append(buff) # write to table
+
+                    
