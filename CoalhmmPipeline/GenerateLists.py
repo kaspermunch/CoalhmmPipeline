@@ -4,6 +4,27 @@ import os.path
 import os
 
 
+class Error(Exception):
+    """
+    Base class for exceptions in this module.
+    """
+    pass
+
+
+class ListGenerationError(Error):
+    """
+    Exception raised for errors in ...
+
+    Attributes:
+        expression: input expression in which
+                    the error occurred
+        message:    explanation of the error
+    """
+    def __init__(self, expression, message):
+        self.expression = expression
+        self.message = message
+
+
 def generateLists(alignmentNumber, size, hdf):
     list_entries = []
     chunking = [x.fetch_all_fields() for x in hdf.root.maps.main.where("(alignmentNumber=="+str(alignmentNumber) +") & (segment==1)")] #assume sorted
@@ -30,7 +51,8 @@ def generateLists(alignmentNumber, size, hdf):
     if "lists" not in hdf.root:
         hdf.createTable(hdf.root, "lists", Lists, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
     elif len([x for x in hdf.root.lists.where("alignmentNumber=="+str(alignmentNumber))]) > 0:
-        print "Lists allready generated for alignment", alignmentNumber, "Aborting"
+        raise ListGenerationError(alignmentNumber, "Lists allready generated for alignment")
+        #print "Lists allready generated for alignment", alignmentNumber, "Aborting"
         return
 
     hdf.root.lists.append(list_entries)
@@ -53,6 +75,7 @@ def numberOfLists(alignmentNumber, hdf):
 def writeAllLists(alignmentNumber, hdf, chunkdir, listdir, outputFileTemplate=''):
     if not listdir.endswith("/"):
         listdir = listdir + "/"
+    #print listdir, alignmentNumber, numberOfLists(alignmentNumber, hdf)
     for l in xrange(1, numberOfLists(alignmentNumber, hdf) +1):
 
         if outputFileTemplate:
