@@ -22,6 +22,14 @@ class MAF(object):
         # sort by name
         self.alignment.sort(key=lambda x: x[1].split(".")[0])
 
+        # check core features
+        for i in range(self.count()):
+            assert self.chromosome(i) is not None
+            assert self.name(i) is not None
+            assert self.start(i) is not None
+            assert self.size(i) is not None
+            assert self.strand(i) is not None
+
     def applyFilter(minScore, ignore=[]):
         """
         Applies filter on MAF inplace
@@ -117,6 +125,13 @@ class MAF(object):
             self.alignment[i][3] = str(int(self.alignment[i][3]) - offset)
 
         return newmaf
+
+    def prepend(self, other):
+        for i in range(len(self.alignment)):
+            assert self.alignment[i][0] == other.alignment[i][0] and self.alignment[i][1] == other.alignment[i][1]
+            self.alignment[i][6] = other.alignment[i][6] + self.alignment[i][6]
+            self.alignment[i][2] = self.alignment[i][2] - other.alignment[i][3]
+            self.alignment[i][3] = self.alignment[i][3] + other.alignment[i][3]
         
     def __str__(self):
         s = self.annotation + "\n"
