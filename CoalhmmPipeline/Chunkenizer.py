@@ -46,13 +46,14 @@ class Chunkenizer:
 
         toMerge = [] #list of mafs to merge
         q = deque() #queue containing mafs which still need processing
+
         mafFile = open(inputMAF) 
         
         for maf in MAFIterator(mafFile):
                 
             if not self.mafTest.test(maf):
             	continue
-            
+
             #split maf and put it on the processing que
             for splitmaf in self.splitter.split(maf):
             	#truncate the maf
@@ -64,7 +65,7 @@ class Chunkenizer:
             	if splitmaf != None and self.acceptMaf(splitmaf):
             		q.append(splitmaf)
             
-            
+
             if len(q) == 0: #queue is empty get the next
                 continue
             
@@ -92,11 +93,14 @@ class Chunkenizer:
 			    print >>sys.stderr, err.message
 			toMerge = [e]
         
-        
+        assert output.initialized # seems all mafs were rejected        
         
         #since the tomerge list is never emty we need to write out the last chunk
         if len(toMerge) > 0 and self.acceptChunk(toMerge):
-        	output.writeChunk(toMerge)			
+            try:
+                output.writeChunk(toMerge)
+            except CoordinateError, err:
+                print >>sys.stderr, err.message                
         
         #fullfill the output objects last wishes... if any
         output.finalize()
