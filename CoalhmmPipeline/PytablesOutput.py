@@ -37,7 +37,7 @@ class CoordinateError(Error):
 #class responsible for the entire output
 #this is where nearly all the work goes
 class PytablesOutput:
-    def __init__(self, chunkDir, ingroup, tableHDF, alignmentNumber, chunkFilePrefix=''):
+    def __init__(self, chunkDir, ingroup, tableHDF, alignmentNumber, coordinatesToCheck, chunkFilePrefix=''):
         self.initialized = False
         self.nextChunk = 1 #internal counter to keep track if chunk numbering
         self.chunkDir = chunkDir #output directory for the chunked fasta files
@@ -53,6 +53,8 @@ class PytablesOutput:
                           #it is also used to give unique row ids to the maps
 
         self.hdfFile = tableHDF
+        self.coordinatesToCheck = coordinatesToCheck
+        
         #Create two groups
         if not ("maps" in self.hdfFile.root):
             self.hdfFile.createGroup(self.hdfFile.root, "maps")
@@ -206,7 +208,9 @@ class PytablesOutput:
                     speciesPositionPlusStrand = speciesPosition[i]
 
                 if speciesPositionPlusStrand < 0:
-                   raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n%s\n" % '\n'.join([x[:80] for x in str(maf).split('\n')]))
+
+                   if maf.name(i) in self.coordinatesToCheck:
+                       raise CoordinateError(speciesPositionPlusStrand < 0, "logically inconsistent input:\n%s\n" % '\n'.join([x[:80] for x in str(maf).split('\n')]))
                     
 #                     # had to condition the exception because only Hsap coordinates are checked in Kays bonobo alignments. 
 #                     if maf.name(i) == 'Hsap':
