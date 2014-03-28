@@ -18,7 +18,8 @@ from PytablesOutput import CoordinateError
 
 class Chunkenizer:
 
-    def __init__(self, splitter, mergeCriteria, mafTest, mafQualityFilters, chunkQualityFilters, truncater):
+    def __init__(self, splitter, mergeCriteria, mafFilter, mafTest, mafQualityFilters, chunkQualityFilters, truncater):
+        self.mafFilter = mafFilter
         self.mafTest = mafTest
         self.splitter = splitter
         self.mergeCriteria = mergeCriteria
@@ -50,6 +51,8 @@ class Chunkenizer:
         mafFile = open(inputMAF) 
         
         for maf in MAFIterator(mafFile):
+
+            self.mafFilter.inplace(maf)
                 
             if not self.mafTest.test(maf):
             	continue
