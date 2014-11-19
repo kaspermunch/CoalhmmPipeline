@@ -126,6 +126,100 @@ class MAF(object):
 
         return newmaf
 
+    def rtrunc(self, trunc_start, trunc_end):
+
+        newmaf = MAF()
+
+        # no meaningfull annotation
+        self.annotation = "a "
+        newmaf.annotation = "a "
+
+        for i in range(len(self.alignment)):
+
+            tag, name, start, length, strand, total, seq = self.alignment[i]
+
+            # cutout sequences fragments:
+            self.alignment[i][6] = seq[:int(trunc_start)]
+            cutout = seq[int(trunc_start):int(trunc_end)]
+            trunc = seq[int(trunc_end):]
+
+            # get the number of bases we trunc off:
+            offset = 0
+            gaps = 0
+            for c in trunc:
+                if c != '-':
+                    offset += 1
+                else:
+                    gaps += 1
+                    
+            # add sequence lines to new maf:
+            newmaf.alignment.append([tag, name, start, str(offset), strand, total, trunc])
+
+            # get the number of bases in the cutout:
+            for c in cutout:
+                if c != '-':
+                    offset += 1
+
+            # adjust coordinates on original maf:
+            #self.alignment[i][2] = str(int(self.alignment[i][2]) + offset)
+            self.alignment[i][3] = str(int(self.alignment[i][3]) - offset)
+
+        return newmaf
+
+
+    def ltrunc_by_species_coord(self, idx, sp_start, sp_end):
+        """Trim maf using plus strand coordinates of a species"""
+
+        newmaf = MAF()
+
+        # no meaningfull annotation
+        self.annotation = "a "
+        newmaf.annotation = "a "
+
+        tag, name, start, length, strand, total, seq = self.alignment[idx]        
+
+        if strand == '-':
+            start, end = int(total) - (int(start)+int(length)), int(total) - int(start)
+            seq = seq[::-1]
+        else:
+            start, end = int(start), int(start)+int(length)
+
+        assert start < end
+        assert start <= sp_start < end
+        assert start < sp_end <= end
+
+        # number of bases to trim off start:
+        trim_start = sp_start - start
+        trim_end = end - sp_end
+
+        cols_trim_start = 0
+        bases = 0
+        for c in seq:
+            if bases == trim_start:
+                break
+            if c != '-':
+                bases += 1
+            cols_trim_start += 1
+        assert bases ==  trim_start
+
+        # number of bases to trim off end:
+        cols_trim_end = 0
+        bases = 0
+        for c in seq:
+            if bases == trim_end:
+                break
+            if c != '-':
+                bases += 1
+            cols_trim_end += 1
+        assert bases ==  trim_end
+
+        if strand == '-':
+            cols_trim_start, cols_trim_end = cols_trim_end, cols_trim_start
+            return self.rtrunc(cols_trim_start, len(seq)-cols_trim_end)
+        else:
+            return self.ltrunc(cols_trim_start, len(seq)-cols_trim_end)
+
+
     def prepend(self, other):
         for i in range(len(self.alignment)):
             assert self.alignment[i][0] == other.alignment[i][0] and self.alignment[i][1] == other.alignment[i][1]
@@ -167,4 +261,41 @@ def MAFIterator(fileob):
         where += seplen
         yield MAF(block[:where])
         block = block[where:]
+
+if __name__ == "__main__":
+
+    test_maf = """a score=15970.000000
+s calJac3.chr7 39980538 10 + 155834243 GCGGTGTTGT
+s gorGor3.chr1 5749428 10 + 229507203 GTGGCGTTGC
+s hg19.chr1 5682968 10 + 249250621 GTGGCGTTGC
+s nomLeu1.GL397433 2526565 10 + 2715696 GTGGCGTTGT
+s panTro3.chr1 5590671 10 + 228333871 GTGGCGTTGC
+s ponAbe2.chr1 5012978 10 - 229942017 GTGGCATTGT
+s rheMac2.chr1 8619867 10 + 228252215 GTGGTGTTGT"""
+
+    maf = MAF(test_maf)
+    print maf
+    #print maf.ltrunc_by_species_coord(2, 5682968+2, 5682978-3)
+    print maf.ltrunc_by_species_coord(2, 5682968, 5682968+4)
+    print maf
+
+    print "########"
+
+    test_maf = """a score=4418638.000000
+s calJac3.chr7 115851821 1872 - 155834243 ttttctagtttcttaaggtggaagctgaagttgttgatGGCACtcagtccaagactgattattccccatgattgaagc
+s gorGor3.chr1 5722038 1873 + 229507203 ttttctagtttcttaaggtggaagctgaagttgttgatGGCACtcagtccaagactgattattccccatgattgaagc
+s hg19.chr1 243565767 68 - 249250621 ttttctagtttcttaaggtggaagctgaagttgttgatGGCACtcagtccaggactga----------tgattgaagc
+s nomLeu1.GL397433 187229 1891 - 2715696 ttttctagtttcttaaggtggaagctgaagttgttgaCGGCACtcagtccaggactgattattccccatgattgaggc
+s panTro3.chr1 222741314 1875 - 228333871 ttttctagtttcttaaggtggaagctgaagttgttgaCGGCACtcagtccaggactgattattccccatgactgaagc
+s papHam1.scaffold1958 6904 1960 - 191851 ttttctagtttcttaaggtggaagctgaagtcgttgaCGTCACtcagtccaggactaattattccccatgactgaagc
+s ponAbe2.chr1 224927154 1874 + 229942017 ttttctagtttcttaaggtggaagctgaagttgttgatGGCACtcagtccaggactgattattccccatgactgaagc
+s rheMac2.chr1 219630387 1949 - 228252215 ttttctagtttcttaaggtggaagctgaagttgttgaCGCCACtcagtccaggactaattattccccatgactgaagc"""
+
+    maf = MAF(test_maf)
+    print maf
+    
+    #print maf.ltrunc_by_species_coord(2, 5684787+20, 5684855-10)
+    print maf.ltrunc_by_species_coord(2, 5684787, 5684787+4)
+    print maf
+
 
