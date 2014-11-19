@@ -27,7 +27,7 @@ class IngroupTruncater:
         for i in range(len(maf.data(0))-1, 0, -1):
             ns = 0
             for j in range(maf.count()):
-                assert len(maf.data(j)) == len(maf.data(0))
+                assert len(maf.data(j)) == len(maf.data(0)), str(maf)
                 if maf.name(j) not in self.ingroup:
                     continue
                     
