@@ -45,6 +45,7 @@ class SpeciesChunkMap(IsDescription): # maps.<speciesname>
     strand = Int8Col(pos=3) # ect..
     begin = Int64Col(pos=4)
     end = Int64Col(pos=5)
+    srcLength = Int64Col(pos=6)
 
 #table scheme for the coordinates    
 class SpeciesCoordinates(IsDescription): # coords.<speciesname>  (single pos coordinates, mapping between alignment and species coordinates)

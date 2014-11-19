@@ -33,7 +33,6 @@ def generateLists(alignmentNumber, size, hdf):
     list_start = -2*size
     curr_list = 0
     list_entry = 1
-    # FIXME: should we start a new list when we change chromosome?
     for (colId, alno, chunk, segment, score, begin, end) in chunking:
         if(begin - list_start > size):
             curr_list = curr_list+1

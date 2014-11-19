@@ -203,7 +203,7 @@ class PytablesOutput:
                     continue
                     
                 if maf.strand(i) == "-": #all coordinates in the table should be on the plus strand
-                    speciesPositionPlusStrand = maf.srcLength(i) - speciesPosition[i]
+                    speciesPositionPlusStrand = maf.srcLength(i) - speciesPosition[i] - 1 # KM: added a -1 here that Troels forgot
                 else:
                     speciesPositionPlusStrand = speciesPosition[i]
 
@@ -259,7 +259,7 @@ class PytablesOutput:
                     intstrand = 1
                 else:
                     intstrand = -1
-                speciesMap = (self.mafCount, encodeChrName(maf.chromosome(i)), intstrand, maf.start(i) & 0xFFFFFFFFFFFF, maf.end(i) & 0xFFFFFFFFFFFF)
+                speciesMap = (self.mafCount, encodeChrName(maf.chromosome(i)), intstrand, maf.start(i) & 0xFFFFFFFFFFFF, maf.end(i) & 0xFFFFFFFFFFFF, maf.srcLength(i) & 0xFFFFFFFFFFFF)
                 #self.hdfFile.root.maps[maf.name(i)].append(speciesMap)
                 table = self.hdfFile.root.maps[maf.name(i)]
                 table.append([speciesMap])
