@@ -30,8 +30,17 @@ class IngroupMergeCriteria:
 			
 			if maf1.chromosome(i) != maf2.chromosome(i):
 				return False
-				
-			if maf2.start(i) - maf1.end(i) > self.maxGap:
+
+			assert maf1.strand() in ('-', '+')
+
+			if maf1.strand() == '-': # maf2 is same strand
+				gap = (maf2.srcLength(i) - maf2.end(i)) - (maf1.srcLength(i) - maf1.start(i))
+			else:
+				gap = maf2.start(i) - maf1.end(i)
+			if gap < 0: 
+				# if gap is negative then the sequences for that species is are not in the right order.
 				return False
-		
+			if gap > self.maxGap: 
+				return False
+
 		return True
