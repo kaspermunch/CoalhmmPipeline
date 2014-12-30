@@ -1,4 +1,4 @@
-#generic chunkenizer using 3 objects for splitting, criteria and output		
+#generic chunkenizer using 3 objects for splitting, criteria and output     
 #Construct using
 #Chunkenizer(
 #parameter 1 : splitter - object potetially manipulating maf entries shortening or even splitting
@@ -26,20 +26,20 @@ class Chunkenizer:
         self.mafQualityFilters = mafQualityFilters
         self.chunkQualityFilters = chunkQualityFilters
         self.truncater = truncater
-	self.instanceUsedAlready = False
+    self.instanceUsedAlready = False
     
     def acceptMaf(self, maf):
         for mqf in self.mafQualityFilters:
             if not mqf.accept(maf): 
-                return False		
+                return False        
         return True
-    	
+        
     def acceptChunk(self, mafs):
         for cqf in self.chunkQualityFilters:
             if not cqf.accept(mafs): 
-                return False		
+                return False        
         return True
-    	
+        
     def chunkenize(self, inputMAF, output):
 
         assert not self.instanceUsedAlready, "WARNING: Use instances only once! depending parameter objects data may be corrupted"
@@ -55,18 +55,18 @@ class Chunkenizer:
             self.mafFilter.inplace(maf)
                 
             if not self.mafTest.test(maf):
-            	continue
+                continue
 
             #split maf and put it on the processing que
             for splitmaf in self.splitter.split(maf):
-            	#truncate the maf
-            	#print "before truncating\n", splitmaf, "\nafter"
-            	splitmaf = self.truncater.truncate(splitmaf)
-            	#print splitmaf
-            	#raw_input("press enter")    
-            	
-            	if splitmaf != None and self.acceptMaf(splitmaf):
-            		q.append(splitmaf)
+                #truncate the maf
+                #print "before truncating\n", splitmaf, "\nafter"
+                splitmaf = self.truncater.truncate(splitmaf)
+                #print splitmaf
+                #raw_input("press enter")    
+                
+                if splitmaf != None and self.acceptMaf(splitmaf):
+                    q.append(splitmaf)
             
 
             if len(q) == 0: #queue is empty get the next
@@ -75,7 +75,7 @@ class Chunkenizer:
             #if the tomerge list is empty then just add one maf from the queue
             #later code assumes toMerge is not empty
             if len(toMerge) == 0:
-            	toMerge.append(q.popleft())
+                toMerge.append(q.popleft())
             
             #now just flush the queue
             #for every element in the queue: test with the mergeCriteria against the last added maf in tomerge list
@@ -83,18 +83,18 @@ class Chunkenizer:
             #otherwise writeout the tomerge list, and then add.
             
             while len(q) > 0:
-            	e = q.popleft()
-            	last = toMerge[len(toMerge) -1]
-            	
-            	if self.mergeCriteria.shouldMerge(last, e):
-        		    toMerge.append(e)
-            	else:
-            	    if self.acceptChunk(toMerge):
-            	        try:
-            			    output.writeChunk(toMerge)
-            			except CoordinateError, err:
-            			    print >>sys.stderr, err.message
-            		toMerge = [e]
+                e = q.popleft()
+                last = toMerge[len(toMerge) -1]
+                
+                if self.mergeCriteria.shouldMerge(last, e):
+                    toMerge.append(e)
+                else:
+                    if self.acceptChunk(toMerge):
+                        try:
+                            output.writeChunk(toMerge)
+                        except CoordinateError, err:
+                            print >>sys.stderr, err.message
+                    toMerge = [e]
         
         assert output.initialized # seems all mafs were rejected        
         
