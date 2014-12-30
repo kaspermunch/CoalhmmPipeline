@@ -87,14 +87,14 @@ class Chunkenizer:
             	last = toMerge[len(toMerge) -1]
             	
             	if self.mergeCriteria.shouldMerge(last, e):
-		    toMerge.append(e)
+        		    toMerge.append(e)
             	else:
             	    if self.acceptChunk(toMerge):
             	        try:
-			    output.writeChunk(toMerge)
-			except CoordinateError, err:
-			    print >>sys.stderr, err.message
-			toMerge = [e]
+            			    output.writeChunk(toMerge)
+            			except CoordinateError, err:
+            			    print >>sys.stderr, err.message
+            		toMerge = [e]
         
         assert output.initialized # seems all mafs were rejected        
         
