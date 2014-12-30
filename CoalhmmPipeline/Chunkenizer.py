@@ -26,7 +26,7 @@ class Chunkenizer:
         self.mafQualityFilters = mafQualityFilters
         self.chunkQualityFilters = chunkQualityFilters
         self.truncater = truncater
-    self.instanceUsedAlready = False
+        self.instanceUsedAlready = False
     
     def acceptMaf(self, maf):
         for mqf in self.mafQualityFilters:
