@@ -21,7 +21,7 @@ class Annotation:
     	if start >= end:
 	    return False
     
-    	m = start + (end - start)/2
+    	m = start + (end - start)/float(2)
     
     	(a,b) = self.annotation[chrom][m]
     
