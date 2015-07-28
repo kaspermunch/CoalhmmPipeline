@@ -29,6 +29,8 @@ class MAF(object):
             assert self.start(i) is not None
             assert self.size(i) is not None
             assert self.strand(i) is not None
+            assert self.length(i) == len(self.data(i).replace('-', '')), (self.length(i), len(self.data(i).replace('-', '')), self.name(i), self.data(i))
+            assert self.size(i) == len(self.data(i)), (self.size(i), len(self.data(i)), self.name(i), self.data(i))
 
     def applyFilter(minScore, ignore=[]):
         """

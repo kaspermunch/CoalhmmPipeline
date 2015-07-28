@@ -1,9 +1,11 @@
 from MAF import *
 
 class IngroupTruncater:
-    def __init__(self, ingroup, junkchars='Nn-'):
+    def __init__(self, ingroup, junkchars='Nn'):
         self.ingroup = ingroup
         self.junkchars = junkchars
+        assert "-" not in self.junkchars
+
         
     def truncate(self, maf):
         out = "a score=%f\n" % maf.score()
@@ -16,9 +18,9 @@ class IngroupTruncater:
                 if maf.name(j) not in self.ingroup:
                     continue
                     
-                if maf.data(j)[i] in self.junkchars:
+                if maf.data(j)[i] in self.junkchars + '-':
                     ns = ns +1
-                    
+
             if ns == len(self.ingroup):
                 lt = lt +1
             else:
@@ -31,7 +33,7 @@ class IngroupTruncater:
                 if maf.name(j) not in self.ingroup:
                     continue
                     
-                if maf.data(j)[i] in self.junkchars:
+                if maf.data(j)[i] in self.junkchars + '-':
                     ns = ns +1
                     
             if ns == len(self.ingroup):
@@ -59,7 +61,7 @@ class IngroupTruncater:
             #adjust start
             for c in maf.data(j)[0:lt]:
                 if c not in "-":
-                    start = start + strand
+                    start = start + 1#strand
                     
             #calculate size
             for c in data:
