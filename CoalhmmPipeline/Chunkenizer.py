@@ -18,7 +18,7 @@ from PytablesOutput import CoordinateError
 
 class Chunkenizer:
 
-    def __init__(self, splitter, mergeCriteria, mafFilter, mafTest, mafQualityFilters, chunkQualityFilters, truncater):
+    def __init__(self, splitter, mergeCriteria, mafFilter, mafTest, mafQualityFilters, chunkQualityFilters, truncater, masker):
         self.mafFilter = mafFilter
         self.mafTest = mafTest
         self.splitter = splitter
@@ -26,6 +26,7 @@ class Chunkenizer:
         self.mafQualityFilters = mafQualityFilters
         self.chunkQualityFilters = chunkQualityFilters
         self.truncater = truncater
+        self.masker = masker
         self.instanceUsedAlready = False
     
     def acceptMaf(self, maf):
@@ -50,6 +51,13 @@ class Chunkenizer:
 
         mafFile = open(inputMAF) 
         
+        # print "DEBUGGING"
+        # with open('/home/kmt/chr2.fa', 'r') as f:
+        #     f.readline()
+        #     chromosome2 = "".join(x.strip() for x in f.readlines())
+        # from string import maketrans
+        # trans = maketrans("ATGC", "TACG")
+
         for maf in MAFIterator(mafFile):
 
             self.mafFilter.inplace(maf)
@@ -57,16 +65,45 @@ class Chunkenizer:
             if not self.mafTest.test(maf):
                 continue
 
+            # print 'orig maf'
+            # print maf
+
             #split maf and put it on the processing que
             for splitmaf in self.splitter.split(maf):
                 #truncate the maf
                 #print "before truncating\n", splitmaf, "\nafter"
+
+                # print "after splitting"
+                # print splitmaf
+                for idx in range(maf.count()):
+                    assert maf.end(idx) == maf.start(idx) + maf.length(idx)
+                    assert maf.start(idx) <= splitmaf.start(idx) <= maf.start(idx) + maf.length(idx), (maf.start(idx), splitmaf.start(idx), maf.start(idx) + maf.length(idx))
+                    assert maf.start(idx) <= splitmaf.end(idx) <= maf.start(idx) + maf.length(idx), (maf.start(idx), splitmaf.end(idx), maf.start(idx) + maf.length(idx))
+                #     if splitmaf.name(idx).startswith('hg19'):
+                #         s = splitmaf.data(idx).replace('-', '').upper()
+                #         if splitmaf.strand(idx) == '-':
+                #             ref = chromosome2[splitmaf.srcLength(idx) - splitmaf.start(idx) - splitmaf.length(idx): splitmaf.srcLength(idx) - splitmaf.start(idx) ].upper()
+                #             ref = ref[::-1].translate(trans)
+                #         else:
+                #             ref = chromosome2[splitmaf.start(idx): splitmaf.start(idx) + splitmaf.length(idx)].upper()
+                #         assert s == ref, (s, ref)
+
+
                 splitmaf = self.truncater.truncate(splitmaf)
+
                 #print splitmaf
                 #raw_input("press enter")    
-                
+
                 if splitmaf != None and self.acceptMaf(splitmaf):
-                    q.append(splitmaf)
+                    q.append(self.masker.mask(splitmaf))
+
+                    # print "after truncation"
+                    # print splitmaf
+                    for idx in range(maf.count()):
+                        assert maf.end(idx) == maf.start(idx) + maf.length(idx)
+                        assert maf.start(idx) <= splitmaf.start(idx) <= maf.start(idx) + maf.length(idx), (maf.start(idx), splitmaf.start(idx), maf.start(idx) + maf.length(idx), idx)
+                        assert maf.start(idx) <= splitmaf.end(idx) <= maf.start(idx) + maf.length(idx), (maf.start(idx), splitmaf.end(idx), maf.start(idx) + maf.length(idx), idx)
+                    # print '###############'
             
 
             if len(q) == 0: #queue is empty get the next
