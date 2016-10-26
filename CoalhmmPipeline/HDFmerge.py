@@ -52,7 +52,7 @@ def merge(srcs, dst):
             else:
                 desttab = grp[tab._v_name]
 
-            c = 1e7
+            c = int(1e7)
             start, stop = 0, c
             size = len(tab)
             while start < size:
