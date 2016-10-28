@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='CoalhmmPipeline',
-      version='1.0',
+      version='1.1',
       description='',
       author='Kasper Munch',
       author_email='kaspermunch@birc.au.dk',
