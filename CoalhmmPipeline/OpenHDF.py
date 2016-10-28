@@ -1,6 +1,9 @@
 
 import os
-from tables import openFile
+try:
+    from tables import openFile
+except ImportError:
+    from tables import open_file as openFile
 
 class OpenHDF():
 
