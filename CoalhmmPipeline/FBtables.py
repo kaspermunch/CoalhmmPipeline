@@ -40,7 +40,7 @@ class Forward:
         scheme['position'] = Int64Col(pos=2)
         for i in range(self.nrStates):
             scheme["V" + str(i)] = Float64Col(pos=(i+3))
-        table = hdf.createTable(hdf.root.forward, listNr, scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
+        table = hdf.create_table(hdf.root.forward, listNr, scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
 
 
     def _createCSIndex(self):

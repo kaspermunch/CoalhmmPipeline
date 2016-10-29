@@ -57,13 +57,13 @@ class PytablesOutput:
         
         #Create two groups
         if not ("maps" in self.hdfFile.root):
-            self.hdfFile.createGroup(self.hdfFile.root, "maps")
+            self.hdfFile.create_group(self.hdfFile.root, "maps")
         if not ("coordinates" in self.hdfFile.root):
-            self.hdfFile.createGroup(self.hdfFile.root, "coordinates")
+            self.hdfFile.create_group(self.hdfFile.root, "coordinates")
         
         #we know we are going to need this table, so we will create it now
         if not ("main" in self.hdfFile.root.maps):
-            self.hdfFile.createTable(self.hdfFile.root.maps, "main", MainChunkMap)
+            self.hdfFile.create_table(self.hdfFile.root.maps, "main", MainChunkMap)
 
     #We don't know what the mafs will look like until we get the first one
     #here we initialize some structures to help output the result
@@ -81,14 +81,14 @@ class PytablesOutput:
         #so we store a reference in a list    
         self.coordinateTables = []
         for i in range(maf.count()):
-            self.hdfFile.createTable(self.hdfFile.root.maps, maf.name(i), SpeciesChunkMap)
+            self.hdfFile.create_table(self.hdfFile.root.maps, maf.name(i), SpeciesChunkMap)
             if i not in self.ingroupIndexes: #outgroup species do not get a table
                 self.coordinateTables.append(None) #but outgroups still have an index we should respect
             else:
                 #create a table for coordinates
                 self.coordinateTables.append([]) # rows gets inserted as tubles and flushed to pytables later
                 if not (maf.name(i) in self.hdfFile.root.coordinates):
-                    self.hdfFile.createTable(self.hdfFile.root.coordinates, maf.name(i), SpeciesCoordinates, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False)) #creation of the table
+                    self.hdfFile.create_table(self.hdfFile.root.coordinates, maf.name(i), SpeciesCoordinates, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False)) #creation of the table
 
     
     #this method gets called with the mafs (in a list) that should be chunked together

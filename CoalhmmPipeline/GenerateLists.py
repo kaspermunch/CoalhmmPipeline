@@ -48,7 +48,7 @@ def generateLists(alignmentNumber, size, hdf):
         list_entry = list_entry +1
         
     if "lists" not in hdf.root:
-        hdf.createTable(hdf.root, "lists", Lists, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
+        hdf.create_table(hdf.root, "lists", Lists, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
     elif len([x for x in hdf.root.lists.where("alignmentNumber=="+str(alignmentNumber))]) > 0:
         raise ListGenerationError(alignmentNumber, "Lists allready generated for alignment")
         #print "Lists allready generated for alignment", alignmentNumber, "Aborting"

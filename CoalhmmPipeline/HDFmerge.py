@@ -48,7 +48,7 @@ def merge(srcs, dst):
 #            print "copying", tab
             desttab = None
             if tab._v_name not in grp:
-                desttab = dst._v_file.createTable(grp, tab._v_name, tab.description, filters=tab.filters)
+                desttab = dst._v_file.create_table(grp, tab._v_name, tab.description, filters=tab.filters)
             else:
                 desttab = grp[tab._v_name]
 

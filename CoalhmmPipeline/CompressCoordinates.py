@@ -20,7 +20,7 @@ def compressCoordinates(coords):
         return
         
     # create table
-    table = coords._v_file.createTable(coords._v_parent, "_compress_tmp_", SpeciesIntervalCoordinates, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
+    table = coords._v_file.create_table(coords._v_parent, "_compress_tmp_", SpeciesIntervalCoordinates, filters=Filters(complevel=0, complib='blosc', shuffle=True, fletcher32=False))
     buff = []
 
 

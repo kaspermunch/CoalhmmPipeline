@@ -1,6 +1,6 @@
 from tables import *
 ##monkey patching pytables
-Node.__getitem__ = lambda self, key : self._f_getChild(key)
+Node.__getitem__ = lambda self, key : self._f_get_child(key)
 ##end of patch
 
 def encodeChrName(name):

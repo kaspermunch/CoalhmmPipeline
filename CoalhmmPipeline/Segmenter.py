@@ -25,7 +25,7 @@ def createSegments(table):
         return
         
     #create table
-    dst = hdf.createTable(root.segments, name, Segments)
+    dst = hdf.create_table(root.segments, name, Segments)
 
 #     state = None
 #     buff = []

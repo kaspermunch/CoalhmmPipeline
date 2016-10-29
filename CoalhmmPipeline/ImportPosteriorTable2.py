@@ -40,7 +40,7 @@ def importPosterior(hdf, posteriorTableFile, alignmentNumber, listNumber, coords
         scheme["alignmentNumber"] = UInt16Col(pos=(numberOfPostProbs+5))
         scheme["speciesPosition"] = Int64Col(pos=(numberOfPostProbs+6))
         ## print scheme
-        table = hdf.createTable(hdf.root.posteriors, decodeChrName(alignmentNumber), scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
+        table = hdf.create_table(hdf.root.posteriors, decodeChrName(alignmentNumber), scheme, filters=Filters(complevel=9, complib='blosc', shuffle=True, fletcher32=False))
     data = open(posteriorTableFile)
 
     data.readline() #discard header
